@@ -424,7 +424,6 @@ export default function App() {
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 id="scanPhoto"
                 style={{ display: "none" }}
                 onChange={async (e) => {
