@@ -56,7 +56,7 @@ async function callClaude(prompt, system) {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    model: "claude-3-sonnet-20240229",
+    model: "claude-haiku-4-5",
     max_tokens: 1000,
     system: system || "Sei un assistente utile per la gestione della cucina. Rispondi sempre in italiano.",
     messages: [{ role: "user", content: prompt }]
