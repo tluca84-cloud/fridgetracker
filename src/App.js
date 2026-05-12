@@ -73,6 +73,33 @@ async function callClaude(prompt, system) {
   }
 }
 
+async function callClaudeWithImage(base64, mediaType) {
+  const res = await fetch("/.netlify/functions/claude", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5",
+      max_tokens: 1000,
+      system: "Sei un estrattore di dati da scontrini. Rispondi SOLO con JSON valido, nessun altro testo.",
+      messages: [{
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: { type: "base64", media_type: mediaType, data: base64 }
+          },
+          {
+            type: "text",
+            text: "Questo è uno scontrino della spesa. Estrai tutti gli articoli alimentari. Restituisci SOLO un array JSON con oggetti: {name, qty (numero), unit (tra: pz,g,kg,ml,L,conf,busta,lattina), category (tra: Latticini,Carne & Pesce,Verdure,Frutta,Avanzi,Bevande,Pasta & Riso,Conserve,Snack,Oli & Condimenti,Spezie,Altro), location (frigo o dispensa)}. Solo JSON grezzo."
+          }
+        ]
+      }]
+    })
+  });
+  const d = await res.json();
+  return d.content?.map(b => b.text || "").join("") || "";
+}
+
 
 
 export default function App() {
@@ -91,6 +118,8 @@ export default function App() {
   const [shoppingLoading, setShoppingLoading] = useState(false);
   const [shoppingChecked, setShoppingChecked] = useState({});
   const [toast, setToast] = useState(null);
+  const [scanMode, setScanMode] = useState("photo");
+  const [scanImage, setScanImage] = useState(null);
 
   useEffect(() => { saveData(data); }, [data]);
 
@@ -148,6 +177,23 @@ export default function App() {
     }
     setScanLoading(false);
   }
+
+  async function handleScanPhoto() {
+  if (!scanImage) return;
+  setScanLoading(true);
+  setScanResult(null);
+  try {
+    const base64 = scanImage.split(",")[1];
+    const mediaType = scanImage.split(";")[0].split(":")[1];
+    const txt = await callClaudeWithImage(base64, mediaType);
+    const clean = txt.replace(/```json|```/g, "").trim();
+    const items = JSON.parse(clean);
+    setScanResult(items);
+  } catch {
+    showToast("Errore nel riconoscimento. Riprova.", "error");
+  }
+  setScanLoading(false);
+}
 
   function confirmScan() {
     if (!scanResult) return;
@@ -353,29 +399,105 @@ export default function App() {
       )}
 
       {view === "scan" && (
-        <div style={{ maxWidth:520 }}>
-          <p style={{ fontSize:14, color:"#888", marginBottom:"1rem" }}>Incolla il testo dello scontrino. L'AI riconosce automaticamente i prodotti.</p>
-          <textarea value={scanText} onChange={e => setScanText(e.target.value)}
-            placeholder={"Es:\nLatte UHT 1L x2  €1.80\nPetto di pollo 500g  €4.20\n..."}
-            style={{ width:"100%", minHeight:150, fontSize:13, boxSizing:"border-box", borderRadius:8, border:"1px solid #ddd", padding:10, resize:"vertical", fontFamily:"monospace" }} />
-          <button style={s.btn()} onClick={handleScan} disabled={scanLoading || !scanText.trim()}>
-            {scanLoading ? "Analizzo..." : "Analizza scontrino"}
-          </button>
+        <div style={{ maxWidth: 520 }}>
+          <p style={{ fontSize: 14, color: "#888", marginBottom: "1rem" }}>
+            Scatta una foto allo scontrino oppure incolla il testo. L'AI riconosce automaticamente i prodotti.
+          </p>
+
+          {/* Pulsanti modalità */}
+          <div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
+            <button
+              onClick={() => setScanMode("photo")}
+              style={{ ...s.navBtn(scanMode === "photo"), flex: 1 }}>
+              📷 Foto scontrino
+            </button>
+            <button
+              onClick={() => setScanMode("text")}
+              style={{ ...s.navBtn(scanMode === "text"), flex: 1 }}>
+              ✏️ Testo manuale
+            </button>
+          </div>
+
+          {/* Modalità foto */}
+          {scanMode === "photo" && (
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                id="scanPhoto"
+                style={{ display: "none" }}
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    setScanImage(ev.target.result);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <label htmlFor="scanPhoto" style={{
+                display: "block", textAlign: "center", padding: "2rem",
+                border: "2px dashed #ddd", borderRadius: 12, cursor: "pointer",
+                color: "#888", fontSize: 14, marginBottom: "1rem"
+              }}>
+                {scanImage
+                  ? <img src={scanImage} alt="scontrino" style={{ maxWidth: "100%", borderRadius: 8 }} />
+                  : <span>📷 Tocca per scattare o scegliere una foto</span>
+                }
+              </label>
+              {scanImage && (
+                <button style={s.btn()} onClick={handleScanPhoto} disabled={scanLoading}>
+                  {scanLoading ? "Analizzo..." : "Analizza foto"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Modalità testo */}
+          {scanMode === "text" && (
+            <div>
+              <textarea
+                value={scanText}
+                onChange={e => setScanText(e.target.value)}
+                placeholder={"Es:\nLatte UHT 1L x2  €1.80\nPetto di pollo 500g  €4.20\n..."}
+                style={{
+                  width: "100%", minHeight: 150, fontSize: 13, boxSizing: "border-box",
+                  borderRadius: 8, border: "1px solid #ddd", padding: 10,
+                  resize: "vertical", fontFamily: "monospace"
+                }}
+              />
+              <button style={s.btn()} onClick={handleScan} disabled={scanLoading || !scanText.trim()}>
+                {scanLoading ? "Analizzo..." : "Analizza testo"}
+              </button>
+            </div>
+          )}
+
+          {/* Risultati */}
           {scanResult && (
-            <div style={{ marginTop:"1.5rem" }}>
-              <p style={{ fontSize:13, fontWeight:500, marginBottom:10 }}>Trovati {scanResult.length} articoli:</p>
-              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+            <div style={{ marginTop: "1.5rem" }}>
+              <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>
+                Trovati {scanResult.length} articoli:
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {scanResult.map((i, idx) => (
-                  <div key={idx} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", ...s.card, padding:"8px 12px" }}>
+                  <div key={idx} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    ...s.card, padding: "8px 12px"
+                  }}>
                     <div>
-                      <span style={{ fontWeight:500, fontSize:14 }}>{CATEGORY_ICONS[i.category]||"📦"} {i.name}</span>
-                      <span style={{ fontSize:12, color:"#888", marginLeft:8 }}>{i.qty} {i.unit} · {i.category} · {i.location}</span>
+                      <span style={{ fontWeight: 500, fontSize: 14 }}>{CATEGORY_ICONS[i.category] || "📦"} {i.name}</span>
+                      <span style={{ fontSize: 12, color: "#888", marginLeft: 8 }}>{i.qty} {i.unit} · {i.category} · {i.location}</span>
                     </div>
-                    <button onClick={() => setScanResult(r => r.filter((_,j) => j!==idx))} style={{ fontSize:12, color:"#c62828", border:"none", background:"transparent", cursor:"pointer" }}>✕</button>
+                    <button onClick={() => setScanResult(r => r.filter((_, j) => j !== idx))}
+                      style={{ fontSize: 12, color: "#c62828", border: "none", background: "transparent", cursor: "pointer" }}>✕</button>
                   </div>
                 ))}
               </div>
-              <button style={s.btn()} onClick={confirmScan}>Aggiungi tutti all'inventario</button>
+              <button style={s.btn()} onClick={confirmScan}>
+                Aggiungi tutti all'inventario
+              </button>
             </div>
           )}
         </div>
