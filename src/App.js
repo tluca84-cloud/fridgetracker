@@ -178,13 +178,39 @@ export default function App() {
     setScanLoading(false);
   }
 
+  function compressImage(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const maxSize = 1024;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = (h / w) * maxSize; w = maxSize; }
+        else { w = (w / h) * maxSize; h = maxSize; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.8));
+    };
+    img.src = dataUrl;
+  });
+}
+  
+  
+  
   async function handleScanPhoto() {
   if (!scanImage) return;
   setScanLoading(true);
   setScanResult(null);
   try {
-    const base64 = scanImage.split(",")[1];
-    const mediaType = scanImage.split(";")[0].split(":")[1];
+    // Ridimensiona l'immagine prima di inviarla
+    const compressed = await compressImage(scanImage);
+    const base64 = compressed.split(",")[1];
+    const mediaType = compressed.split(";")[0].split(":")[1];
     const txt = await callClaudeWithImage(base64, mediaType);
     const clean = txt.replace(/```json|```/g, "").trim();
     const items = JSON.parse(clean);
