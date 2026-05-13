@@ -526,30 +526,71 @@ export default function App() {
 
           {/* Risultati */}
           {scanResult && (
-            <div style={{ marginTop: "1.5rem" }}>
-              <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>
-                Trovati {scanResult.length} articoli:
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {scanResult.map((i, idx) => (
-                  <div key={idx} style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    ...s.card, padding: "8px 12px"
-                  }}>
-                    <div>
-                      <span style={{ fontWeight: 500, fontSize: 14 }}>{CATEGORY_ICONS[i.category] || "📦"} {i.name}</span>
-                      <span style={{ fontSize: 12, color: "#888", marginLeft: 8 }}>{i.qty} {i.unit} · {i.category} · {i.location}</span>
-                    </div>
-                    <button onClick={() => setScanResult(r => r.filter((_, j) => j !== idx))}
-                      style={{ fontSize: 12, color: "#c62828", border: "none", background: "transparent", cursor: "pointer" }}>✕</button>
-                  </div>
-                ))}
+  <div style={{ marginTop: "1.5rem" }}>
+    <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>
+      Trovati {scanResult.length} articoli — modifica se necessario:
+    </p>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {scanResult.map((item, idx) => (
+        <div key={idx} style={{ ...s.card, padding: "10px 12px" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+              {/* Nome */}
+              <input
+                value={item.name}
+                onChange={e => setScanResult(r => r.map((x, i) => i === idx ? { ...x, name: e.target.value } : x))}
+                style={{ ...s.input, fontWeight: 500 }}
+              />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {/* Quantità */}
+                <input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={item.qty}
+                  onChange={e => setScanResult(r => r.map((x, i) => i === idx ? { ...x, qty: parseFloat(e.target.value) || 0 } : x))}
+                  style={s.input}
+                />
+                {/* Unità */}
+                <select
+                  value={item.unit}
+                  onChange={e => setScanResult(r => r.map((x, i) => i === idx ? { ...x, unit: e.target.value } : x))}
+                  style={s.input}>
+                  {unitOptions.map(u => <option key={u}>{u}</option>)}
+                </select>
               </div>
-              <button style={s.btn()} onClick={confirmScan}>
-                Aggiungi tutti all'inventario
-              </button>
+              {/* Categoria */}
+              <select
+                value={item.category}
+                onChange={e => setScanResult(r => r.map((x, i) => i === idx ? { ...x, category: e.target.value } : x))}
+                style={s.input}>
+                {[...CATEGORIES.frigo, ...CATEGORIES.freezer, ...CATEGORIES.dispensa]
+                  .filter((v, i, a) => a.indexOf(v) === i)
+                  .map(c => <option key={c}>{c}</option>)}
+              </select>
+              {/* Posizione */}
+              <select
+                value={item.location}
+                onChange={e => setScanResult(r => r.map((x, i) => i === idx ? { ...x, location: e.target.value } : x))}
+                style={s.input}>
+                <option value="frigo">🧊 Frigo</option>
+                <option value="freezer">❄️ Freezer</option>
+                <option value="dispensa">🗄 Dispensa</option>
+              </select>
             </div>
-          )}
+            {/* Rimuovi */}
+            <button
+              onClick={() => setScanResult(r => r.filter((_, j) => j !== idx))}
+              style={{ fontSize: 12, color: "#c62828", border: "none", background: "transparent", cursor: "pointer", marginTop: 4 }}>✕</button>
+          </div>
+        </div>
+      ))}
+    </div>
+    <button style={s.btn()} onClick={confirmScan}>
+      Aggiungi tutti all'inventario
+    </button>
+  </div>
+)}
         </div>
       )}
 
