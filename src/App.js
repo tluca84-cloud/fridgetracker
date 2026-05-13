@@ -307,70 +307,6 @@ export default function App() {
       borderRadius: 8, padding: "10px 18px", fontSize: 14, fontWeight: 500
     })
   };
-{editItem && (
-  <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,0.4)", zIndex:9998, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
-    <div style={{ background:"#fff", borderRadius:16, padding:"1.5rem", width:"100%", maxWidth:400 }}>
-      <h3 style={{ margin:"0 0 1rem", fontSize:16 }}>Modifica articolo</h3>
-      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-        <div>
-          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Nome</label>
-          <input value={editItem.name} onChange={e => setEditItem(x => ({ ...x, name: e.target.value }))} style={s.input} />
-        </div>
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-          <div>
-            <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Quantità</label>
-            <input type="number" min="0" step="0.5" value={editItem.qty} onChange={e => setEditItem(x => ({ ...x, qty: parseFloat(e.target.value) || 0 }))} style={s.input} />
-          </div>
-          <div>
-            <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Unità</label>
-            <select value={editItem.unit} onChange={e => setEditItem(x => ({ ...x, unit: e.target.value }))} style={s.input}>
-              {unitOptions.map(u => <option key={u}>{u}</option>)}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Categoria</label>
-          <select value={editItem.category} onChange={e => setEditItem(x => ({ ...x, category: e.target.value }))} style={s.input}>
-            {[...CATEGORIES.frigo, ...CATEGORIES.freezer, ...CATEGORIES.dispensa]
-              .filter((v, i, a) => a.indexOf(v) === i)
-              .map(c => <option key={c}>{c}</option>)}
-          </select>
-        </div>
-        <div>
-          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Posizione</label>
-          <select value={editItem.loc} onChange={e => setEditItem(x => ({ ...x, loc: e.target.value }))} style={s.input}>
-            <option value="frigo">🧊 Frigo</option>
-            <option value="freezer">❄️ Freezer</option>
-            <option value="dispensa">🗄 Dispensa</option>
-          </select>
-        </div>
-        <div>
-          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Scadenza</label>
-          <input type="date" value={editItem.expiry || ""} onChange={e => setEditItem(x => ({ ...x, expiry: e.target.value }))} style={s.input} />
-        </div>
-      </div>
-      <div style={{ display:"flex", gap:10, marginTop:"1rem" }}>
-        <button style={{ ...s.btn(), flex:1 }} onClick={() => setEditItem(null)}>Annulla</button>
-        <button style={{ ...s.btn(), flex:1, fontWeight:600 }} onClick={() => {
-          if (editItem.loc !== editItem.location) {
-            removeItem(editItem.location, editItem.id);
-            addItem({ ...editItem, location: editItem.loc });
-          } else {
-            updateItem(editItem.loc, editItem.id, {
-              name: editItem.name,
-              qty: editItem.qty,
-              unit: editItem.unit,
-              category: editItem.category,
-              expiry: editItem.expiry
-            });
-          }
-          setEditItem(null);
-          showToast("Articolo aggiornato!");
-        }}>Salva</button>
-      </div>
-    </div>
-  </div>
-)}
   return (
     <div style={s.app}>
       {toast && <div style={s.toast(toast.type)}>{toast.msg}</div>}
@@ -457,6 +393,70 @@ export default function App() {
       <button onClick={() => removeItem(tab, item.id)} style={{ width:26, height:26, fontSize:12, cursor:"pointer", border:"1px solid #ffcdd2", borderRadius:6, background:"transparent", color:"#c62828" }}>✕</button>
     </div>
   </div>
+  {editItem && (
+  <div style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,0.4)", zIndex:9998, display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem" }}>
+    <div style={{ background:"#fff", borderRadius:16, padding:"1.5rem", width:"100%", maxWidth:400 }}>
+      <h3 style={{ margin:"0 0 1rem", fontSize:16 }}>Modifica articolo</h3>
+      <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+        <div>
+          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Nome</label>
+          <input value={editItem.name} onChange={e => setEditItem(x => ({ ...x, name: e.target.value }))} style={s.input} />
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+          <div>
+            <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Quantità</label>
+            <input type="number" min="0" step="0.5" value={editItem.qty} onChange={e => setEditItem(x => ({ ...x, qty: parseFloat(e.target.value) || 0 }))} style={s.input} />
+          </div>
+          <div>
+            <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Unità</label>
+            <select value={editItem.unit} onChange={e => setEditItem(x => ({ ...x, unit: e.target.value }))} style={s.input}>
+              {unitOptions.map(u => <option key={u}>{u}</option>)}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Categoria</label>
+          <select value={editItem.category} onChange={e => setEditItem(x => ({ ...x, category: e.target.value }))} style={s.input}>
+            {[...CATEGORIES.frigo, ...CATEGORIES.freezer, ...CATEGORIES.dispensa]
+              .filter((v, i, a) => a.indexOf(v) === i)
+              .map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div>
+          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Posizione</label>
+          <select value={editItem.loc} onChange={e => setEditItem(x => ({ ...x, loc: e.target.value }))} style={s.input}>
+            <option value="frigo">🧊 Frigo</option>
+            <option value="freezer">❄️ Freezer</option>
+            <option value="dispensa">🗄 Dispensa</option>
+          </select>
+        </div>
+        <div>
+          <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Scadenza</label>
+          <input type="date" value={editItem.expiry || ""} onChange={e => setEditItem(x => ({ ...x, expiry: e.target.value }))} style={s.input} />
+        </div>
+      </div>
+      <div style={{ display:"flex", gap:10, marginTop:"1rem" }}>
+        <button style={{ ...s.btn(), flex:1 }} onClick={() => setEditItem(null)}>Annulla</button>
+        <button style={{ ...s.btn(), flex:1, fontWeight:600 }} onClick={() => {
+          if (editItem.loc !== editItem.location) {
+            removeItem(editItem.location, editItem.id);
+            addItem({ ...editItem, location: editItem.loc });
+          } else {
+            updateItem(editItem.loc, editItem.id, {
+              name: editItem.name,
+              qty: editItem.qty,
+              unit: editItem.unit,
+              category: editItem.category,
+              expiry: editItem.expiry
+            });
+          }
+          setEditItem(null);
+          showToast("Articolo aggiornato!");
+        }}>Salva</button>
+      </div>
+    </div>
+  </div>
+)}
 </div>
                   );
                 })}
