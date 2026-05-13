@@ -4,6 +4,7 @@ const STORAGE_KEY = "fridgetracker_v1";
 
 const CATEGORIES = {
   frigo: ["Latticini","Carne & Pesce","Verdure","Frutta","Avanzi","Bevande","Altro"],
+  freezer: ["Carne & Pesce","Verdure","Pane & Pasta","Gelati","Piatti Pronti","Altro"],
   dispensa: ["Pasta & Riso","Conserve","Snack","Oli & Condimenti","Spezie","Bevande","Altro"]
 };
 
@@ -12,7 +13,7 @@ const CATEGORY_ICONS = {
   "Pasta & Riso":"🍝","Conserve":"🥫","Snack":"🍿","Oli & Condimenti":"🫙","Spezie":"🧂"
 };
 
-const defaultData = { frigo: [], dispensa: [] };
+const defaultData = { frigo: [], freezer: [], dispensa: [] };
 
 function loadData() {
   try {
@@ -335,11 +336,11 @@ export default function App() {
       {view === "inventory" && (
         <div>
           <div style={s.tabRow}>
-            {["frigo","dispensa"].map(t => (
-              <button key={t} style={s.tabBtn(tab===t)} onClick={() => { setTab(t); setFilterCat("Tutti"); }}>
-                {t === "frigo" ? "🧊 Frigo" : "🗄 Dispensa"}
-              </button>
-            ))}
+            {["frigo","freezer","dispensa"].map(t => (
+            <button key={t} style={s.tabBtn(tab===t)} onClick={() => { setTab(t); setFilterCat("Tutti"); }}>
+            {t === "frigo" ? "🧊 Frigo" : t === "freezer" ? "❄️ Freezer" : "🗄 Dispensa"}
+           </button>
+          ))}
           </div>
           <div style={{ display:"flex", gap:8, marginBottom:"1rem", flexWrap:"wrap" }}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca..." style={{ ...s.input, flex:1, minWidth:140 }} />
@@ -384,6 +385,7 @@ export default function App() {
               <label style={{ fontSize:13, color:"#666", display:"block", marginBottom:4 }}>Posizione</label>
               <select value={form.location} onChange={e => setForm(f => ({ ...f, location:e.target.value, category:CATEGORIES[e.target.value][0] }))} style={s.input}>
                 <option value="frigo">🧊 Frigo</option>
+                <option value="freezer">❄️ Freezer</option>
                 <option value="dispensa">🗄 Dispensa</option>
               </select>
             </div>
