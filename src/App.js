@@ -18,7 +18,12 @@ const defaultData = { frigo: [], freezer: [], dispensa: [] };
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : defaultData;
+    const parsed = raw ? JSON.parse(raw) : defaultData;
+    return {
+      frigo: parsed.frigo || [],
+      freezer: parsed.freezer || [],
+      dispensa: parsed.dispensa || []
+    };
   } catch { return defaultData; }
 }
 
