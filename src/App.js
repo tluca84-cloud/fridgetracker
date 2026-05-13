@@ -143,7 +143,7 @@ export default function App() {
     setData(d => ({ ...d, [loc]: d[loc].map(i => i.id === id ? { ...i, ...changes } : i) }));
   }
 
-  const allItems = [...data.frigo, ...data.dispensa];
+  const allItems = [...data.frigo, ...data.freezer, ...data.dispensa];
 
   const filtered = data[tab].filter(i => {
     const matchCat = filterCat === "Tutti" || i.category === filterCat;
