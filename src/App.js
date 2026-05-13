@@ -361,20 +361,38 @@ export default function App() {
                   const days = daysUntilExpiry(item.expiry);
                   return (
                     <div key={item.id} style={s.card}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
-                        <div style={{ flex:1 }}>
-                          <div style={{ fontSize:12, color:"#888", marginBottom:2 }}>{CATEGORY_ICONS[item.category]||"📦"} {item.category}</div>
-                          <div style={{ fontWeight:500, fontSize:15, marginBottom:4 }}>{item.name}</div>
-                          <div style={{ fontSize:13, color:"#666" }}>{item.qty} {item.unit}</div>
-                          {item.expiry && <div style={{ fontSize:12, color:expiryColor(days), marginTop:4, fontWeight:500 }}>{expiryLabel(days)}</div>}
-                        </div>
-                        <div style={{ display:"flex", flexDirection:"column", gap:4, marginLeft:8 }}>
-                          <button onClick={() => updateItem(tab, item.id, { qty: Math.max(0, item.qty-1) })} style={{ width:26, height:26, fontSize:14, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>−</button>
-                          <button onClick={() => updateItem(tab, item.id, { qty: item.qty+1 })} style={{ width:26, height:26, fontSize:14, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>+</button>
-                          <button onClick={() => removeItem(tab, item.id)} style={{ width:26, height:26, fontSize:12, cursor:"pointer", border:"1px solid #ffcdd2", borderRadius:6, background:"transparent", color:"#c62828" }}>✕</button>
-                        </div>
-                      </div>
-                    </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                    <div style={{ flex:1 }}>
+      <div style={{ fontSize:12, color:"#888", marginBottom:2 }}>{CATEGORY_ICONS[item.category]||"📦"} {item.category}</div>
+      <div style={{ fontWeight:500, fontSize:15, marginBottom:4 }}>{item.name}</div>
+      <div style={{ fontSize:13, color:"#666" }}>{item.qty} {item.unit}</div>
+      {item.expiry && <div style={{ fontSize:12, color:expiryColor(days), marginTop:4, fontWeight:500 }}>{expiryLabel(days)}</div>}
+      {/* Selettore posizione */}
+      <select
+        value={tab}
+        onChange={e => {
+          const newLoc = e.target.value;
+          if (newLoc !== tab) {
+            setData(d => ({
+              ...d,
+              [tab]: d[tab].filter(i => i.id !== item.id),
+              [newLoc]: [...d[newLoc], { ...item, location: newLoc }]
+            }));
+          }
+        }}
+        style={{ marginTop:6, fontSize:12, borderRadius:6, border:"1px solid #ddd", padding:"2px 6px", color:"#666" }}>
+        <option value="frigo">🧊 Frigo</option>
+        <option value="freezer">❄️ Freezer</option>
+        <option value="dispensa">🗄 Dispensa</option>
+      </select>
+    </div>
+    <div style={{ display:"flex", flexDirection:"column", gap:4, marginLeft:8 }}>
+      <button onClick={() => updateItem(tab, item.id, { qty: Math.max(0, item.qty-1) })} style={{ width:26, height:26, fontSize:14, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>−</button>
+      <button onClick={() => updateItem(tab, item.id, { qty: item.qty+1 })} style={{ width:26, height:26, fontSize:14, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>+</button>
+      <button onClick={() => removeItem(tab, item.id)} style={{ width:26, height:26, fontSize:12, cursor:"pointer", border:"1px solid #ffcdd2", borderRadius:6, background:"transparent", color:"#c62828" }}>✕</button>
+    </div>
+  </div>
+</div>
                   );
                 })}
               </div>
