@@ -454,7 +454,7 @@ export default function App() {
   <button onClick={() => updateItem(tab, item.id, { qty: item.qty+1 })} style={{ width:26, height:26, fontSize:14, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>+</button>
   <button onClick={() => setEditItem({ ...item, loc: tab })} style={{ width:26, height:26, fontSize:12, cursor:"pointer", border:"1px solid #ddd", borderRadius:6, background:"transparent" }}>✏️</button>
   <button onClick={() => removeItem(tab, item.id)} style={{ width:26, height:26, fontSize:12, cursor:"pointer", border:"1px solid #ffcdd2", borderRadius:6, background:"transparent", color:"#c62828" }}>✕</button>
-</div>
+     </div>
   </div>
 </div>
                   );
