@@ -386,7 +386,7 @@ export default function App() {
               <select value={form.location} onChange={e => setForm(f => ({ ...f, location:e.target.value, category:CATEGORIES[e.target.value][0] }))} style={s.input}>
                 <option value="frigo">🧊 Frigo</option>
                 <option value="freezer">❄️ Freezer</option>
-                <option value="dispensa">🗄 Dispensa</option>
+                 <option value="dispensa">🗄 Dispensa</option>
               </select>
             </div>
             <div>
